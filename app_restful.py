@@ -1,6 +1,6 @@
 from flask import Flask, request
 from flask_restful import Resource, Api
-from habilidades import Habilidades
+from habilidades import Habilidades, Habilidade, lista_habilidades
 import json
 
 
@@ -36,6 +36,12 @@ class Desenvolvedor(Resource):
     # altera o registro pelo id
     def put(self, id):
         dados = json.loads(request.data)
+        # confere se todas as habilidades estao na lista de habilidades
+        for habilidade in dados['habilidades']:
+            if habilidade not in lista_habilidades:
+                mensagem = 'Habilidade {} nao permitida!'.format(habilidade)
+                response = {'status': 'erro', 'mensagem': mensagem}
+                return response
         desenvolvedores[id] = dados
         response = dados
         return response
@@ -56,6 +62,12 @@ class ListaDesenvolvedores(Resource):
     # insere o registro
     def post(self):
         dados = json.loads(request.data)
+        # confere se todas as habilidades estao na lista de habilidades
+        for habilidade in dados['habilidades']:
+            if habilidade not in lista_habilidades:
+                mensagem = 'Habilidade {} nao permitida!'.format(habilidade)
+                response = {'status': 'erro', 'mensagem': mensagem}
+                return response
         posicao = len(desenvolvedores)
         dados['id'] = posicao
         desenvolvedores.append(dados)
@@ -65,6 +77,7 @@ class ListaDesenvolvedores(Resource):
 api.add_resource(Desenvolvedor, '/dev/<int:id>/')
 api.add_resource(ListaDesenvolvedores, '/dev/')
 api.add_resource(Habilidades, '/habilidades/')
+api.add_resource(Habilidade, '/habilidade/<int:id>/')
 
 if __name__ == '__main__':
     app.run(debug=True)
